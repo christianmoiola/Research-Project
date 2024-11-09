@@ -3,6 +3,7 @@ from collections import Counter
 import itertools
 import matplotlib.pyplot as plt
 import numpy as np
+import os
 # Function to load the data from a json file
 def load_data(path):
     '''
@@ -87,3 +88,46 @@ def plot_word_frequencies(class_dicts, all_classes_freq, top_n=10, mode="total",
         print(f"Chart saved to {save_path}")
     else:
         plt.show()
+
+def plot_histogram(dictionary, output_folder, title="Histogram"):
+    """
+    Creates and saves a histogram showing the number of sentences for each class.
+
+    Args:
+        dictionary (dict): Dictionary where keys are classes and values are lists of sentences.
+        output_folder (str): Path to the folder where the histogram image will be saved.
+    """
+    # Create the output folder if it doesn't exist
+    os.makedirs(output_folder, exist_ok=True)
+    
+    # Extract classes and sentence counts
+    classes = list(dictionary.keys())
+    counts = [len(sentences) for sentences in dictionary.values()]
+
+    # Create the histogram
+    plt.figure(figsize=(10, 6))
+    plt.bar(classes, counts, color='skyblue')
+    
+    # Add labels and title
+    plt.xlabel('Class')
+    plt.ylabel('Number of Sentences')
+    plt.title(title)
+    plt.xticks(rotation=45)
+    
+    # Save the histogram in the specified folder
+    output_path = os.path.join(output_folder, 'class_histogram.png')
+    plt.savefig(output_path, bbox_inches='tight')
+    plt.close()
+    
+    print(f"Histogram saved in: {output_path}")
+
+def vocabulary_lengths(dictionary):
+    '''
+    Length of the vocabulary for each class in the dictionary.
+    '''
+    result = []
+    for class_name, vocab_dict in dictionary.items():
+        vocab_size = len(vocab_dict)
+        result.append(f"Class '{class_name}' has a vocabulary size of {vocab_size}")
+    
+    return "\n".join(result)

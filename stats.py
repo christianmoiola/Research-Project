@@ -6,7 +6,9 @@ from utils import *
 STOPWORDS = set(nltk.corpus.stopwords.words("english"))
 
 def get_sents(data, divided_by_class=False):
-
+    '''
+    Function to get the sentences from the data, divided by class if specified.
+    '''
     if divided_by_class:
         ret = {} if "issimple" not in data[0] else [{}, {}]
     else:
@@ -41,6 +43,9 @@ def get_sents(data, divided_by_class=False):
     return ret
 
 def stats_sent_len(sents):
+    '''
+    Function to get the minimum, maximum and average sentence length of the sentences.
+    '''
     ret = {keys: {} for keys in sents.keys()}
     for key in sents.keys():
         sents_len = [len(sent) for sent in sents[key]]
@@ -52,7 +57,17 @@ def stats_sent_len(sents):
     return ret
 
 def get_freq_dist(sents, lower=True, remove_stopwords=True, freq_cutoff=None):
+    '''
+    Function to get the frequency distribution of the words in the sentences.
 
+    Parameters:
+    - sents (dict): Dictionary with keys from 0 to 15 or all_classes, each containing a list of sentences.
+    - lower (bool): Whether to convert all words to lowercase.
+    - remove_stopwords (bool): Whether to remove stopwords from the frequency distribution.
+    - freq_cutoff (int, optional): Minimum frequency for a word to be included in the distribution.
+    Output:
+    - freq_dist (dict): Dictionary with keys from 0 to 15 or all_classes, each containing the frequency distribution of words.
+    '''
     ret = {keys: {} for keys in sents.keys()}
     ret = dict(sorted(ret.items()))
     for key in sents.keys():

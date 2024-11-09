@@ -9,7 +9,7 @@ from stats import *
 
 
 if __name__ == "__main__":
-    # Download the nltk resources (if not already downloaded)
+    #* Download the nltk resources (if not already downloaded)
     #nltk.download('punkt_tab')
     #nltk.download('stopwords')
 
@@ -26,12 +26,12 @@ if __name__ == "__main__":
     all_sents_test_complex = group_sents(sents_test_complex)
     all_sents_test_simple = group_sents(sents_test_simple)
 
-    # Min, max and average sentence length
+    #* min, max and average sentence length
     print(stats_sent_len(all_sents_train))
     print(stats_sent_len(all_sents_test_complex))
     print(stats_sent_len(all_sents_test_simple))
 
-    # Number of sentences in the training and test set
+    #* Number of sentences in the training and test set
     print(f"Number of sentences in the training set: {len(all_sents_train['all_classes'])}")
     print(f"Number of sentences in the test set (complex): {len(all_sents_test_complex['all_classes'])}")
     print(f"Number of sentences in the test set (simple): {len(all_sents_test_simple['all_classes'])}")
@@ -46,7 +46,12 @@ if __name__ == "__main__":
     freq_dist_classes_test_simple = get_freq_dist(sents_test_simple, lower=True, remove_stopwords=True, freq_cutoff=2)
     freq_dist_total_test_simple = get_freq_dist(all_sents_test_simple, lower=True, remove_stopwords=True, freq_cutoff=2)
     
-    # Plot the frequency distribution of the words in the training set and test set
+    #* Vocalurary size of the training and test set
+    print(vocabulary_lengths(freq_dist_total_train))
+    print(vocabulary_lengths(freq_dist_total_test_complex))
+    print(vocabulary_lengths(freq_dist_total_test_simple))
+
+    #* Plot the frequency distribution of the words in the training set and test set
     '''
     dataset = ["train", "test_complex", "test_simple"]
     classes = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, "total"]
@@ -78,6 +83,19 @@ if __name__ == "__main__":
                 save_path=path
             )
     '''
+
+    #* Histogram  of answer distribution
+    '''
+    path = "results/histograms_answer_counts/train"
+    plot_histogram(sents_train,title="Answer distribution in the training set", output_folder=path)
+    path = "results/histograms_answer_counts/test_complex"
+    plot_histogram(sents_test_complex,title="Answer distribution in the test set (complex)", output_folder=path)
+    path = "results/histograms_answer_counts/test_simple"
+    plot_histogram(sents_test_simple,title="Answer distribution in the test set (simple)", output_folder=path)
+    '''
+
+
+
 
     #freq_dist_complete = get_freq_dist(all_sents, lower=True, remove_stopwords=True, freq_cutoff=2)
 
