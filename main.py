@@ -10,7 +10,7 @@ from stats import *
 
 if __name__ == "__main__":
     # Download the nltk resources (if not already downloaded)
-    #nltk.download('punkt')
+    #nltk.download('punkt_tab')
     #nltk.download('stopwords')
 
     # Load the data from the json files
