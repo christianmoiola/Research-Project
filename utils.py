@@ -31,7 +31,7 @@ def group_sents(sents):
     return ret
 
 
-def plot_word_frequencies(class_dicts, all_classes_freq, top_n=10, mode="total", save_path=None):
+def plot_word_frequencies(class_dicts, all_classes_freq, top_n=10, mode="total", save_path=None, title=None):
     """
     Creates a bar chart with the top n most frequent words based on the chosen mode.
     
@@ -76,7 +76,10 @@ def plot_word_frequencies(class_dicts, all_classes_freq, top_n=10, mode="total",
     title_mode = "All Classes" if mode == "total" else f"Class {mode}"
     ax.set_xlabel("Words")
     ax.set_ylabel("Frequency")
-    ax.set_title(f"Top {top_n} Most Frequent Words in {title_mode}")
+    if title == None:
+        ax.set_title(f"Top {top_n} Most Frequent Words in {title_mode}")
+    else:
+        ax.set_title(title)
     ax.legend(title="Classes", bbox_to_anchor=(1.05, 1), loc='upper left')
 
     plt.xticks(rotation=45)
@@ -131,3 +134,23 @@ def vocabulary_lengths(dictionary):
         result.append(f"Class '{class_name}' has a vocabulary size of {vocab_size}")
     
     return "\n".join(result)
+
+def filter_freq_dist(dictionary, pos_tag):
+    '''
+    Function to filter words by a specific POS tag in each class, assuming the dictionary is already POS-tagged.
+
+    Parameters:
+    - dictionary (dict): Dictionary with POS tags as keys and words as values for each class.
+    - pos_tag (str): The POS tag to filter by (e.g., 'NN', 'JJ', etc.).
+
+    Output:
+    - filtered_dict (dict): Dictionary with filtered words based on the specified POS tag for each class.
+    '''
+    filtered_dict = {}
+    
+    for class_name, pos_dict in dictionary.items():
+        # Filter words that match the specified POS tag
+        filtered_words = pos_dict.get(pos_tag, {})
+        filtered_dict[class_name] = filtered_words
+    
+    return filtered_dict
