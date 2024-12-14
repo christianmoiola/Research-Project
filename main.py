@@ -20,6 +20,8 @@ if __name__ == "__main__":
     #nltk.download('stopwords')
     #nltk.download('averaged_perceptron_tagger_eng')
 
+    data = []
+
     # Load the data from the json files
     train_raw = load_data(os.path.join('dataset','tallyqa','train.json'))
     test_raw = load_data(os.path.join('dataset','tallyqa','test.json'))
@@ -34,10 +36,14 @@ if __name__ == "__main__":
     all_sents_test_simple = group_sents(sents_test_simple)
 
     #* min, max and average sentence length
-    print(stats_sent_len(all_sents_train))
-    print(stats_sent_len(all_sents_test_complex))
-    print(stats_sent_len(all_sents_test_simple))
+    sent_stats = stats_sent_len(all_sents_train)
+    data.append(["Train"] + [len(all_sents_train['all_classes'])] + [sent_stats["all_classes"][key] for key in ["min_sent_len", "max_sent_len", "avg_sent_len"]])
+    sent_stats = stats_sent_len(all_sents_test_complex)
+    data.append(["Test-Complex"] + [len(all_sents_test_complex['all_classes'])] + [sent_stats["all_classes"][key] for key in ["min_sent_len", "max_sent_len", "avg_sent_len"]])
+    sent_stats = stats_sent_len(all_sents_test_simple)
+    data.append(["Test-Simple"] + [len(all_sents_test_simple['all_classes'])] + [sent_stats["all_classes"][key] for key in ["min_sent_len", "max_sent_len", "avg_sent_len"]])
 
+    
     #* Number of sentences in the training and test set
     print(f"Number of sentences in the training set: {len(all_sents_train['all_classes'])}")
     print(f"Number of sentences in the test set (complex): {len(all_sents_test_complex['all_classes'])}")
@@ -57,6 +63,15 @@ if __name__ == "__main__":
     print(vocabulary_lengths(freq_dist_total_train))
     print(vocabulary_lengths(freq_dist_total_test_complex))
     print(vocabulary_lengths(freq_dist_total_test_simple))
+
+    voc_lengths  = [len(freq_dist_total_train['all_classes']), len(freq_dist_total_test_complex['all_classes']), len(freq_dist_total_test_simple['all_classes'])]
+    
+    for i, elem in enumerate(data):
+        elem.append(voc_lengths[i])
+
+    #* Create a table with the statistics
+    create_table(data, ["Split", "Number of sentences", "Min sentence length", "Max sentence length", "Average sentence length", "Vocabulary size"], "results/table.png")
+    
 
     #* Plot the frequency distribution of the words in the training set and test set
     '''
@@ -98,7 +113,7 @@ if __name__ == "__main__":
     '''
 
     #* POS tagging
-    '''
+    
     pos_fd_classes_train = pos_distribution(freq_dist_classes_train)
     pos_fd_total_train = pos_distribution(freq_dist_total_train)
     pos_fd_classes_test_complex = pos_distribution(freq_dist_classes_test_complex)
@@ -132,4 +147,4 @@ if __name__ == "__main__":
                     save_path=path,
                     title=f"Top {TOP} Most Frequent {p} in {c}"
                 )
-    '''
+    
