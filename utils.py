@@ -195,3 +195,13 @@ def filter_freq_dist(dictionary, pos_tag):
         filtered_dict[class_name] = filtered_words
     
     return filtered_dict
+
+def flatten_freq_distribution(freq_dist):
+    '''
+    Flatten the frequency distribution of different classes into a single dictionary with the key 'all_classes'.
+    '''
+    combined = {"all_classes": Counter()}
+    for key, class_freqs in freq_dist.items():
+        combined["all_classes"].update(class_freqs)
+    combined["all_classes"] = dict(combined["all_classes"])  # Converti in dizionario normale
+    return combined

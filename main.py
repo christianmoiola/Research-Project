@@ -2,6 +2,7 @@ import os
 from collections import Counter
 import nltk
 from nltk.corpus import stopwords
+from deepdiff import DeepDiff
 
 # Importing the functions from the files
 from utils import *
@@ -19,7 +20,7 @@ if __name__ == "__main__":
     #nltk.download('punkt_tab')
     #nltk.download('stopwords')
     #nltk.download('averaged_perceptron_tagger_eng')
-
+    
     data = []
 
     # Load the data from the json files
@@ -29,7 +30,6 @@ if __name__ == "__main__":
     # Get the sentences divided by class of the training and test data
     sents_train = get_sents(train_raw, divided_by_class=True)
     sents_test_complex, sents_test_simple = get_sents(test_raw, divided_by_class=True)
-    
     # Group all the sentences
     all_sents_train = group_sents(sents_train)
     all_sents_test_complex = group_sents(sents_test_complex)
@@ -58,8 +58,18 @@ if __name__ == "__main__":
 
     freq_dist_classes_test_simple = get_freq_dist(sents_test_simple, lower=True, remove_stopwords=True, freq_cutoff=2, remove_punctuation=True)
     freq_dist_total_test_simple = get_freq_dist(all_sents_test_simple, lower=True, remove_stopwords=True, freq_cutoff=2, remove_punctuation=True)
+
+    # Frequency distribution of the subjects in the training and test set
+    freq_subj_dist_classes_train = get_subject_freq_distribution(sents_train)
+    freq_subj_dist_classes_test_complex = get_subject_freq_distribution(sents_test_complex)
+    freq_subj_dist_classes_test_simple = get_subject_freq_distribution(sents_test_simple)
+
+    freq_subj_dist_total_train = flatten_freq_distribution(freq_subj_dist_classes_train)
+    freq_subj_dist_total_test_complex = flatten_freq_distribution(freq_subj_dist_classes_test_complex)
+    freq_subj_dist_total_test_simple = flatten_freq_distribution(freq_subj_dist_classes_test_simple)
     
     #* Vocalurary size of the training and test set
+    '''
     print(vocabulary_lengths(freq_dist_total_train))
     print(vocabulary_lengths(freq_dist_total_test_complex))
     print(vocabulary_lengths(freq_dist_total_test_simple))
@@ -68,10 +78,11 @@ if __name__ == "__main__":
     
     for i, elem in enumerate(data):
         elem.append(voc_lengths[i])
-
+    '''
     #* Create a table with the statistics
+    '''
     create_table(data, ["Split", "Number of sentences", "Min sentence length", "Max sentence length", "Average sentence length", "Vocabulary size"], "results/table.png")
-    
+    '''  
 
     #* Plot the frequency distribution of the words in the training set and test set
     '''
@@ -102,6 +113,38 @@ if __name__ == "__main__":
             )
     
     '''
+
+    #* Frequency distribution of the subjects in the training and test set
+
+    # Map dataset names to their corresponding dictionaries
+    freq_dist_classes = {
+        "train": freq_subj_dist_classes_train,
+        "test_complex": freq_subj_dist_classes_test_complex,
+        "test_simple": freq_subj_dist_classes_test_simple,
+    }
+
+    freq_dist_totals = {
+        "train": freq_subj_dist_total_train,
+        "test_complex": freq_subj_dist_total_test_complex,
+        "test_simple": freq_subj_dist_total_test_simple,
+    }
+
+    for elem in DATASET:
+        for c in CLASSES:
+            directory = f"results/freq_subj_dist/{elem}"
+            if not os.path.exists(directory):
+                os.makedirs(directory)
+            path = f"results/freq_subj_dist/{elem}/top_{TOP}_most_freq_subject_in_{c}.png"
+            
+            # Pass the appropriate dictionaries for each dataset
+            plot_word_frequencies(
+                class_dicts=freq_dist_classes[elem],
+                all_classes_freq=freq_dist_totals[elem]["all_classes"],
+                top_n=TOP,
+                mode=c,
+                save_path=path
+            )
+
     #* Histogram  of answer distribution
     '''
     path = "results/histograms_answer_counts/train"
@@ -113,7 +156,7 @@ if __name__ == "__main__":
     '''
 
     #* POS tagging
-    
+    '''
     pos_fd_classes_train = pos_distribution(freq_dist_classes_train)
     pos_fd_total_train = pos_distribution(freq_dist_total_train)
     pos_fd_classes_test_complex = pos_distribution(freq_dist_classes_test_complex)
@@ -147,4 +190,4 @@ if __name__ == "__main__":
                     save_path=path,
                     title=f"Top {TOP} Most Frequent {p} in {c}"
                 )
-    
+    '''

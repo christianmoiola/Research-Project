@@ -1,9 +1,14 @@
 from collections import Counter
 import nltk
 from nltk import pos_tag
-from utils import *
+import spacy
+from spacy import displacy
 import string
+from utils import *
+import re
+from tqdm import tqdm
 
+nlp = spacy.load("en_core_web_sm")
 STOPWORDS = set(nltk.corpus.stopwords.words("english"))
 
 def get_sents(data, divided_by_class=False):
@@ -116,3 +121,62 @@ def pos_distribution(dictionary):
     
     return result
 
+def clean_tokens(tokens):
+    # Remove errors in the dataset
+    tokens = re.sub(r'\bhowmanyof\b', 'how many of', tokens)
+    tokens = re.sub(r'\bmanylights\b', 'many lights', tokens)
+    tokens = re.sub(r'\bJhow\b', 'how', tokens)
+    tokens = re.sub(r'\bmanyof\b', 'many of', tokens)
+    tokens = re.sub(r'\bclocks.are\b', 'clocks are', tokens)
+    tokens = re.sub(r'\bt.v\b', 'tv', tokens)
+    return tokens
+
+def get_subject_freq_distribution(sents):
+    # List of nouns that were incorrectly classified by spaCy
+    noun_incorrectly_classified = ['utensils', 'kites', 'surfboard', 'covers', 'red stands', 'barefoot', 'geese', 'stems', 'squash', 
+                                   'wristbands', 'mobile', 'giraffe', 'wakeboard', 'hydrant', 'elephant', 'sink', 'skateboarder', 'tub', 
+                                   'salads', 'couches', 'parrot', 'remote', 'skateboard', 'shrimp', 'buffalo', 'sheep', 'wakeboard', 
+                                   'building', 'burritos', 'salads', 'toothbrushe']
+    # Dictionary to store the frequency of each class
+    ret = {keys: {} for keys in sents.keys()}
+    ret = dict(sorted(ret.items()))
+
+    for key in sents.keys():
+        dic = {}
+        for sent in tqdm(sents[key], desc=f"Processing {key}"):
+            # Remove errors in the dataset
+            sent = clean_tokens(" ".join(sent))
+            doc = nlp(sent)
+            class_name = ""
+            var = 0
+            for token in doc:
+                # Find "how many"
+                if token.text.lower() == "how" and token.nbor(1).text.lower() == "many":
+                    # Find the noun after "how many"
+                    for possible_noun in doc[token.i+2:]:
+                        if possible_noun.pos_ in ["NOUN", "PROPN"]:  # Noun or proper noun
+                            # Extract the noun and its related tokens
+                            related_tokens = [possible_noun]
+                            for child in possible_noun.children:
+                                if child.dep_ in ["amod", "det", "compound", "nmod"] and child.text.lower() not in ["many", "how"]:
+                                    related_tokens.append(child)
+                            # Reconstruct the class name
+                            related_tokens.sort(key=lambda t: t.i)  # Sort by token index
+                            class_name = " ".join([t.text for t in related_tokens])
+                            break
+                    # If no noun was found, check if the sentence contains a noun that was incorrectly classified
+                    if class_name == "": 
+                        for possible_noun in doc:
+                            if possible_noun.text.lower() in noun_incorrectly_classified:
+                                class_name = possible_noun.text.lower()
+                                break
+                    if class_name != "":
+                        if "How" in class_name or "many" in class_name:
+                            print(class_name)
+                        if class_name not in dic:
+                            dic[class_name] = 0
+                        # Increment the class frequency
+                        dic[class_name] += 1
+                        break
+        ret[key] = dic
+    return ret
