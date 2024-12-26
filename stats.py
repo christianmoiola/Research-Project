@@ -1,12 +1,11 @@
-from collections import Counter
 import nltk
 from nltk import pos_tag
 import spacy
-from spacy import displacy
 import string
 from utils import *
 import re
 from tqdm import tqdm
+import statistics
 
 nlp = spacy.load("en_core_web_sm")
 STOPWORDS = set(nltk.corpus.stopwords.words("english"))
@@ -59,7 +58,8 @@ def stats_sent_len(sents):
         avg_sent_len = round(sum(sents_len) / len(sents_len))
         min_sent_len = min(sents_len)
         max_sent_len = max(sents_len)
-        ret[key] = {"avg_sent_len": avg_sent_len, "min_sent_len": min_sent_len, "max_sent_len": max_sent_len}
+        std_dev = statistics.stdev(sents_len)
+        ret[key] = {"avg_sent_len": avg_sent_len, "min_sent_len": min_sent_len, "max_sent_len": max_sent_len, "std_dev": std_dev}
     return ret
 
 def get_freq_dist(sents, lower=True, remove_stopwords=True, freq_cutoff=None, remove_punctuation=True):
